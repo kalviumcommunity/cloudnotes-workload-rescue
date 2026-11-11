@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
+[[ "${KUBECONFIG:-}" == "$PWD/.lab/kubeconfig" ]] || { echo 'Source .lab/env.sh first; ambient cluster not permitted.' >&2; exit 1; }
 namespace=${NAMESPACE:-cloudnotes-rescue}
 method=${1:?Usage: bash scripts/request.sh GET|POST /path [note-text]}
 path=${2:?Supply request path}

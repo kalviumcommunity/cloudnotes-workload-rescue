@@ -4,3 +4,5 @@ scripts
 *.md
 .env
 __pycache__
+
+.lab/

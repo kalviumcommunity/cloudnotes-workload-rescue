@@ -1,10 +1,10 @@
 # CloudNotes Workload Rescue
 
-CloudNotes fails its local Kubernetes release checks. Investigate and repair three manifest faults. Your instructor supplies the assessment and a prepared local cluster.
+CloudNotes fails its local Kubernetes release checks. Investigate and repair three manifest faults, then prove authenticated notes survive application Pod replacement.
 
 ## Student workflow
 
-Fork this repository, clone your personal fork, and create `fix/workload-rescue`. Use a free editor and the prepared `kubectl` environment. Work only in namespace `cloudnotes-rescue` unless your instructor supplies another name.
+Fork this repository, clone your personal fork, and create `fix/workload-rescue`. Use a free editor and the isolated environment created below. Work only in namespace `cloudnotes-rescue`.
 
 **Never push fixes to `kalviumcommunity/cloudnotes-workload-rescue` or open a pull request against it.** Commit/push only to your personal fork after checking `git remote -v`. Submit one PDF through the assessment portal. No PR is required anywhere.
 
@@ -48,16 +48,25 @@ Quote custom-column arguments containing brackets if your shell expands them. A 
 
 Do not expose Secret values: use `describe secret` for key names, not `get secret -o yaml`, decoded values, environment dumps, or authorization headers. Do not delete PVC, Secret, namespace, or unrelated workloads. Save only disposable practice notes.
 
-## Instructor setup — outside timer
+## Self-service setup — before timer
 
-Free local Kubernetes (kind, minikube, or k3s), kubectl, Docker Engine for image preparation, Python 3 for setup, and a free IDE/PDF exporter are sufficient. No cloud, payment, registry login, or hosted CI/CD. Docker Desktop optional only if free-use licence applies. Prepare a local context, namespace per student, working default dynamic storage provisioner, enough disk space, and preloaded image on all schedulable nodes. Namespace customization uses `NAMESPACE=...` before helper commands and `-n ...` on kubectl.
+Use Linux, macOS or WSL2, Bash, Git, Python 3, curl, and a running Docker Engine. Supported host/engine architectures: amd64 and arm64. Allow at least 2 CPUs, 4 GB free memory and 10 GB free disk for Docker. Initial downloads require internet access to GitHub, kind, Kubernetes and Docker image registries. Docker Desktop is optional where its free-use licence applies. No cloud, payment or registry login needed.
 
 ```bash
-docker build -t cloudnotes-workload:1.0.0 .
-# Example image loading; select the command matching your prepared local cluster:
-# kind load docker-image cloudnotes-workload:1.0.0 --name <cluster-name>
-# minikube image load cloudnotes-workload:1.0.0
-bash scripts/setup.sh
+bash scripts/prepare-lab.sh
+source .lab/env.sh
+kubectl -n cloudnotes-rescue get pods,pvc,svc
 ```
 
-Image/base retrieval may initially need free internet downloads; prepared assessment does not need external services. Setup must show client Ready and PVC Bound; application may show its intended startup failure. Do not pre-solve manifests for students. Do not run setup again during student work, because it reapplies starter files. Re-check cluster/storage/image compatibility before each exam. Instructor handles cleanup after evidence is saved; no destructive namespace deletion is required of students.
+Setup downloads checksum-verified local kind and Kubernetes 1.32.2 kubectl, creates dedicated `cloudnotes-ca4` kind cluster and private kubeconfig, builds and imports actual application/client image, verifies non-root writes on Bound PVC, generates disposable authentication Secret and applies broken baseline. It never edits repair files. Host kubectl version and other clusters are not used. Client must be Ready and PVC Bound; application startup failure remains intentional. Start timer only after `SETUP READY`. Source `.lab/env.sh` in every terminal. Do not run setup again during tasks: it reapplies baseline. Setup errors are not repair faults; resolve them before timing without deleting unrelated resources.
+
+Capture original failures, minimal manifest changes, Ready rollout, Service-DNS responses and same note after Pod replacement in your PDF. Never capture token values.
+
+After saving evidence, optional cleanup deletes **only this lab and its practice data**:
+
+```bash
+.lab/bin/kind delete cluster --name cloudnotes-ca4
+rm -rf .lab
+```
+
+For a fresh attempt use a fresh clone after cleanup. Never delete unrelated clusters or use system prune.

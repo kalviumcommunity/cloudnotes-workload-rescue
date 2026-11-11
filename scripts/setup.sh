@@ -2,7 +2,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 namespace=${NAMESPACE:-cloudnotes-rescue}
-# Instructor runs only against the intended disposable local assessment cluster.
+# Only student-owned bootstrap may apply this baseline, never an ambient context.
+[[ -f .lab/cluster-owned && "${KUBECONFIG:-}" == "$PWD/.lab/kubeconfig" ]] || { echo 'Run bash scripts/prepare-lab.sh before timing.' >&2; exit 1; }
+[[ ! -e .lab/prepared ]] || { echo 'Already prepared; do not reapply baseline during repairs.' >&2; exit 1; }
 kubectl create namespace "$namespace" --dry-run=client -o yaml | kubectl apply -f -
 # Random disposable practice value, generated without exposing it in terminal output.
 if ! kubectl -n "$namespace" get secret cloudnotes-access >/dev/null 2>&1; then
